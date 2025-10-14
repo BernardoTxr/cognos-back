@@ -7,6 +7,8 @@ from auth.users import auth_backend, current_active_user, fastapi_users
 from fastapi.middleware.cors import CORSMiddleware
 from database import User
 from dados.preencher_dados import dados_router
+from partidas.partidas import router as partidas_router
+from wiki.wiki import router as wiki_router
 
 
 @asynccontextmanager
@@ -43,6 +45,8 @@ app.include_router(
 )
 
 app.include_router(dados_router)
+app.include_router(partidas_router)
+app.include_router(wiki_router)
 
 
 @app.get("/authenticated-route")
