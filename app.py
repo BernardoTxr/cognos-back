@@ -45,26 +45,6 @@ app.include_router(
     tags=["users"],
 )
 
-app.include_router(
-    social_router,
-    tags=["social"],
-)
-
-app.include_router(
-    duelos_router,
-    tags=["duelo"],
-)
-
-app.include_router(
-    stats_router,
-    tags=["stats"],
-)
-
-# include routes from home/home.py
-app.include_router(macro_router, tags=["Home"])
-app.include_router(meso_router, tags=["Home"])
-app.include_router(question_router, tags=["Home"])
-app.include_router(lesson_router, tags=["Home"])
 
 
 @app.get("/authenticated-route")
