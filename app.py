@@ -6,10 +6,7 @@ from auth.models import UserCreate, UserRead, UserUpdate
 from auth.users import auth_backend, current_active_user, fastapi_users
 from fastapi.middleware.cors import CORSMiddleware
 from database import User
-from home.home import macro_router, meso_router, question_router, lesson_router
-from social.social import social_router
-from stats.stats import stats_router
-from social.duelos import duelos_router
+from dados.preencher_dados import dados_router
 
 
 @asynccontextmanager
@@ -45,6 +42,7 @@ app.include_router(
     tags=["users"],
 )
 
+app.include_router(dados_router)
 
 
 @app.get("/authenticated-route")

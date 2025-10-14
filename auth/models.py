@@ -14,6 +14,7 @@ from sqlalchemy import Column, String, Boolean, DateTime
 
 class UserRead(schemas.BaseUser[uuid.UUID]):
     username: str
+    is_patient: bool
 
     class Config:
         from_attributes = True
@@ -21,6 +22,7 @@ class UserRead(schemas.BaseUser[uuid.UUID]):
 
 class UserCreate(schemas.BaseUserCreate):
     username: str
+    is_patient: bool
 
     class Config:
         from_attributes = True
@@ -28,6 +30,7 @@ class UserCreate(schemas.BaseUserCreate):
 
 class UserUpdate(schemas.BaseUserUpdate):
     username: str
+    is_patient: bool
 
     class Config:
         from_attributes = True
