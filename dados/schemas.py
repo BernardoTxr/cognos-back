@@ -5,7 +5,7 @@ from datetime import date
 from pydantic import BaseModel
 
 # Importe os Enums do seu arquivo de modelos para manter a consistência.
-from .models import SexoEnum, NivelTeaEnum
+from .models import sexo, nivel_tea
 
 # ===================================================================
 # Schemas para a rota POST (Entrada de Dados) - SEM USAR Field
@@ -19,8 +19,8 @@ class PacientePost(BaseModel):
     nome_completo: str
     data_de_nascimento: date
     cpf: str  # A validação detalhada foi removida, mas o tipo 'str' é garantido.
-    sexo: SexoEnum
-    nivel_tea: NivelTeaEnum
+    sexo: sexo
+    nivel_tea: nivel_tea
 
 class TerapeutaPost(BaseModel):
     """

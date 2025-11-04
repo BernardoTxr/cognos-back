@@ -3,12 +3,11 @@
 from fastapi import APIRouter, HTTPException, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
-
 # 1. Importe os schemas Pydantic que você acabou de criar
 from .schemas import PacientePost, PacienteRead, TerapeutaPost, TerapeutaRead
 
 # Importe os MODELOS ORM (para o Banco de Dados)
-from .models import Paciente, Terapeuta, User 
+from .models import User, Paciente, Terapeuta 
 
 # Importe suas dependências
 from database import get_async_session

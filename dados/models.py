@@ -2,7 +2,6 @@
 
 import uuid
 from enum import Enum as PyEnum
-
 from sqlalchemy import (
     Column,
     ForeignKey,
@@ -22,16 +21,17 @@ Base = declarative_base()
 # --- Modelo User (Verifique se ele herda da sua Base) ---
 class User(SQLAlchemyBaseUserTableUUID, Base):
     # Seus campos da tabela 'users'
+    __tablename__ = "users"
     username = Column(String, nullable=False, unique=True)
     is_patient = Column(Boolean, default=None, nullable=True) # Campo para diferenciar os perfis
     # Outros campos do fastapi-users (email, hashed_password, etc.) já estão incluídos
 
 # --- Enums para os Tipos de Dados ---
-class SexoEnum(str, PyEnum):
+class sexo(str, PyEnum):
     MASCULINO = "masc"
     FEMININO = "fem"
 
-class NivelTeaEnum(str, PyEnum):
+class nivel_tea(str, PyEnum):
     NIVEL_1 = "nivel_1"
     NIVEL_2 = "nivel_2"
     NIVEL_3 = "nivel_3"
@@ -49,11 +49,9 @@ class Paciente(Base):
     nome_completo = Column(String, nullable=False)
     data_de_nascimento = Column(Date, nullable=False)
     cpf = Column(String(11), nullable=False, unique=True)
-    sexo = Column(SAEnum(SexoEnum), nullable=False)
-    nivel_tea = Column(SAEnum(NivelTeaEnum), nullable=False)
-    
-    # Relação opcional para fácil acesso ao objeto User
-    user = relationship("User")
+    sexo = Column(SAEnum(sexo), nullable=False, name='sexo')
+    nivel_tea = Column(SAEnum(nivel_tea), nullable=False, name='nivel_tea')
+
 
 # --- Modelo Terapeuta (para consistência) ---
 class Terapeuta(Base):
@@ -63,6 +61,5 @@ class Terapeuta(Base):
     user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), primary_key=True)
     nome_completo = Column(String, nullable=False)
     documento = Column(String, nullable=True)
-    
-    user = relationship("User")
+
     

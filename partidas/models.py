@@ -4,31 +4,6 @@ from database import Base
 from sqlalchemy.orm import relationship
 from datetime import datetime
 
-'''
-Table partida_JogodaMem {
-  id           integer [primary key]
-  paciente_id  uuid [ref: > paciente.user_id]
-  clicks       varchar
-  duration     integer //em milisegundos
-  played_at    timestamp [default: "now()"]
-}
-
-Table partida_JogodaBola {
-  id           integer [primary key]
-  paciente_id  uuid [ref: > paciente.user_id]
-  acertos      integer
-  duration     integer //em milisegundos
-  played_at    timestamp [default: "now()"]
-}
-
-Table partida_JogoReac  {
-  id           integer [primary key]
-  paciente_id  uuid [ref: > paciente.user_id]
-  reacao       integer //em milisegundos
-  played_at    timestamp [default: "now()"]
-}
-'''
-
 class partida_JogodaMem(Base):
     __tablename__ = "partida_jogodamem"
     id = Column(Integer, primary_key=True, index=True)
