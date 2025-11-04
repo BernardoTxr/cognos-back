@@ -1,49 +1,66 @@
-# partidas/models.py
-
-import uuid
+# define models 
+from sqlalchemy import Boolean, Column, Integer, String, UUID, TIMESTAMP
+from database import Base
+from sqlalchemy.orm import relationship
 from datetime import datetime
 
-from sqlalchemy import (TIMESTAMP, ForeignKey, Integer, String, func)
-from sqlalchemy.orm import Mapped, mapped_column, relationship
-from sqlalchemy.dialects.postgresql import UUID
+'''
+Table partida_JogodaMem {
+  id           integer [primary key]
+  paciente_id  uuid [ref: > paciente.user_id]
+  clicks       varchar
+  duration     integer //em milisegundos
+  played_at    timestamp [default: "now()"]
+}
 
-# Supondo que você tenha um arquivo 'database.py' com a Base declarativa
-# from app.database import Base
-from sqlalchemy.orm import declarative_base
+Table partida_JogodaBola {
+  id           integer [primary key]
+  paciente_id  uuid [ref: > paciente.user_id]
+  acertos      integer
+  duration     integer //em milisegundos
+  played_at    timestamp [default: "now()"]
+}
 
-Base = declarative_base()
+Table partida_JogoReac  {
+  id           integer [primary key]
+  paciente_id  uuid [ref: > paciente.user_id]
+  reacao       integer //em milisegundos
+  played_at    timestamp [default: "now()"]
+}
+'''
 
+class partida_JogodaMem(Base):
+    __tablename__ = "partida_jogodamem"
+    id = Column(Integer, primary_key=True, index=True)
+    paciente_id = Column(UUID, index=True)
+    clicks = Column(Integer)
+    duration = Column(Integer)  # em milisegundos
+    played_at = Column(TIMESTAMP, server_default="now()")  # timestamp como string para simplificação
 
-class Partida(Base):
-    """
-    Modelo ORM para a tabela 'partida'.
-    
-    Representa uma sessão de jogo de um paciente.
-    """
-    __tablename__ = "partida"
+class partida_JogodaBola(Base):
+    __tablename__ = "partida_jogodabola"
+    id = Column(Integer, primary_key=True, index=True)
+    paciente_id = Column(UUID, index=True)
+    acertos = Column(Integer)
+    duration = Column(Integer)  # em milisegundos
+    played_at = Column(TIMESTAMP, server_default="now()")  # timestamp como string para simplificação
 
-    # Colunas da tabela
-    id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    
-    # A coluna 'jogo_id' no DBML é uuid, mas a tabela 'jogo' tem um id integer.
-    # Ajustando para integer para corresponder à PK da tabela 'jogo'.
-    jogo_id: Mapped[int] = mapped_column(Integer, ForeignKey("jogo.id"), nullable=False)
-    
-    paciente_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), 
-        ForeignKey("paciente.user_id"), 
-        nullable=False
-    )
-    
-    results: Mapped[str] = mapped_column(String, nullable=False)
-    duration: Mapped[int] = mapped_column(Integer) # Duração em segundos
-    
-    played_at: Mapped[datetime] = mapped_column(
-        TIMESTAMP(timezone=True),
-        server_default=func.now(),
-        nullable=False
-    )
+class partida_JogoReac(Base):
+    __tablename__ = "partida_jogoreac"
+    id = Column(Integer, primary_key=True, index=True)
+    paciente_id = Column(UUID, index=True)
+    reacao = Column(Integer)  # em milisegundos
+    played_at = Column(TIMESTAMP, server_default="now()")  # timestamp como string para simplificação
 
-    # Relacionamentos (opcional, mas bom para ORM)
-    # paciente = relationship("Paciente", back_populates="partidas")
-    # jogo = relationship("Jogo", back_populates="partidas")
+# schema para inserir partidas
+from pydantic import BaseModel
+class PartidaJogodaMemCreate(BaseModel):
+    clicks: int
+    duration: int
+
+class PartidaJogodaBolaCreate(BaseModel):
+    acertos: int
+    duration: int
+
+class PartidaJogoReacCreate(BaseModel):
+    reacao: int
