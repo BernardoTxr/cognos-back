@@ -9,6 +9,8 @@ from database import User
 from dados.preencher_dados import dados_router
 from partidas.partidas import router as partidas_router
 from wiki.wiki import router as wiki_router
+from paciente_terapeuta.paciente_terapeuta import social_router
+
 
 
 @asynccontextmanager
@@ -47,6 +49,7 @@ app.include_router(
 app.include_router(dados_router)
 app.include_router(partidas_router)
 app.include_router(wiki_router)
+app.include_router(social_router)
 
 
 @app.get("/authenticated-route")

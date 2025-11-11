@@ -7,6 +7,7 @@ from sqlalchemy import (
     ForeignKey,
     String,
     Date,
+    Integer,
     Enum as SAEnum,
     Boolean # Adicionado para o campo is_patient
 )
@@ -49,8 +50,8 @@ class Paciente(Base):
     nome_completo = Column(String, nullable=False)
     data_de_nascimento = Column(Date, nullable=False)
     cpf = Column(String(11), nullable=False, unique=True)
-    sexo = Column(SAEnum(sexo), nullable=False, name='sexo')
-    nivel_tea = Column(SAEnum(nivel_tea), nullable=False, name='nivel_tea')
+    sexo = Column(SAEnum(sexo, name="sexo", values_callable=lambda obj: [e.value for e in obj]))
+    nivel_tea = Column(SAEnum(nivel_tea, name="nivel_tea", values_callable=lambda obj: [e.value for e in obj]))
 
 
 # --- Modelo Terapeuta (para consistência) ---
@@ -61,5 +62,17 @@ class Terapeuta(Base):
     user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), primary_key=True)
     nome_completo = Column(String, nullable=False)
     documento = Column(String, nullable=True)
+
+class status_conec(str, PyEnum):
+    req_paciente = "req_paciente"
+    req_terapeuta = "req_terapeuta"
+    conectados = "conectados"
+
+class PacienteTerapeuta(Base):
+    __tablename__ = "paciente_terapeuta"
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    paciente_id = Column(UUID(as_uuid=True), ForeignKey("paciente.user_id"), nullable=False)
+    terapeuta_id = Column(UUID(as_uuid=True), ForeignKey("terapeuta.user_id"), nullable=False)
+    status = Column(SAEnum(status_conec), nullable=False, name='status')
 
     
