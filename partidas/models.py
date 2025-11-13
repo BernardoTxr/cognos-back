@@ -12,6 +12,16 @@ class partida_JogodaMem(Base):
     duration = Column(Integer)  # em milisegundos
     played_at = Column(TIMESTAMP, server_default="now()")  # timestamp como string para simplificação
 
+class partida_JogoDoWisconsin(Base):
+    __tablename__ = "partida_jogodowisconsin"
+    id = Column(Integer, primary_key=True, index=True)
+    paciente_id = Column(UUID, index=True)
+    acertos = Column(Integer)
+    erros_perseverativos = Column(Integer)
+    erros_nonperseverativos = Column(Integer)
+    falha_manter_conjunto = Column(Integer)
+    categorias_completas = Column(Integer)
+
 class partida_JogodaBola(Base):
     __tablename__ = "partida_jogodabola"
     id = Column(Integer, primary_key=True, index=True)
@@ -39,3 +49,10 @@ class PartidaJogodaBolaCreate(BaseModel):
 
 class PartidaJogoReacCreate(BaseModel):
     reacao: int
+
+class PartidaJogoDoWisconsinCreate(BaseModel):
+    acertos: int
+    erros_perseverativos: int
+    erros_nonperseverativos: int
+    falha_manter_conjunto: int
+    categorias_completas: int
