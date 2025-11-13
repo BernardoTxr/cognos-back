@@ -8,7 +8,7 @@ from database import get_async_session
 from auth.users import current_active_user, User
 from dados.models import PacienteTerapeuta, Terapeuta, Paciente
 
-social_router = APIRouter(prefix="/paciente_terapeuta", tags=["Paciente-Terapeuta"])
+social_router = APIRouter(prefix="/paciente_terapeuta", tags=["paciente-terapeuta"])
 
 
 # 1️⃣ Listar todos os terapeutas conectados ao paciente logado
