@@ -9,6 +9,8 @@ from partidas.models import (
     PartidaJogodaMemCreate,
     PartidaJogodaBolaCreate,
     PartidaJogoReacCreate,
+    partida_JogoDoWisconsin,
+    PartidaJogoDoWisconsinCreate
 )
 from auth.users import current_active_user
 from database import User   
@@ -47,6 +49,25 @@ async def create_jogodabola_partida(
     await session.commit()
     await session.refresh(new_partida)
     return {"id": new_partida.id, "message": "Partida de Jogo da Bola criada com sucesso."}
+
+@router.post("/jogodowisconsin", response_model=dict)
+async def create_jogodowisconsin_partida(
+    partida: PartidaJogoDoWisconsinCreate,
+    session: AsyncSession = Depends(get_async_session),
+    user: User = Depends(current_active_user),
+):
+    new_partida = partida_JogoDoWisconsin(
+        paciente_id=user.id,
+        acertos=partida.acertos,
+        erros_perseverativos=partida.erros_perseverativos,
+        erros_nonperseverativos=partida.erros_nonperseverativos,
+        falha_manter_conjunto=partida.falha_manter_conjunto,
+        categorias_completas=partida.categorias_completas
+        )
+    session.add(new_partida)
+    await session.commit()
+    await session.refresh(new_partida)
+    return {"id": new_partida.id, "message": "Partida de Jogo do Wisconsin criada com sucesso."}
 
 @router.post("/jogodoreac/", response_model=dict)
 async def create_jogodoreac_partida(
