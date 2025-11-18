@@ -1,7 +1,7 @@
 from typing import List
 from fastapi import APIRouter, HTTPException, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, or_, and_, join
+from sqlalchemy import select, or_, and_, join, not_, exists
 from uuid import UUID
 from sqlalchemy.orm import aliased
 from database import get_async_session
@@ -273,3 +273,87 @@ async def rejeitar_conexao(
     await db.commit()
 
     return {"message": "Conexão rejeitada e removida com sucesso."}
+
+@social_router.get("/terapeutas/search")
+async def buscar_terapeutas_por_nome(
+    nome: str,
+    db: AsyncSession = Depends(get_async_session),
+    current_user: User = Depends(current_active_user),
+):
+    # --- Apenas pacientes podem pesquisar terapeutas ---
+    if not current_user.is_patient:
+        raise HTTPException(status_code=403, detail="Apenas pacientes podem buscar terapeutas.")
+
+    # Subquery que seleciona terapeutas já conectados ao paciente atual
+    subquery_conectados = (
+        select(PacienteTerapeuta.terapeuta_id)
+        .where(PacienteTerapeuta.paciente_id == current_user.id)
+    )
+
+    # Query principal:
+    # - join Terapeuta <-> User
+    # - filtra por nome_completo
+    # - exclui terapeutas já conectados
+    query = (
+        select(Terapeuta, User)
+        .join(User, User.id == Terapeuta.user_id)
+        .where(Terapeuta.nome_completo.ilike(f"%{nome}%"))
+        .where(not_(Terapeuta.user_id.in_(subquery_conectados)))
+        .limit(10)
+    )
+
+    result = await db.execute(query)
+    rows = result.all()
+
+    terapeutas = [
+        {
+            "user_id": str(t.user_id),
+            "nome_completo": t.nome_completo,
+            "documento": t.documento,
+            "email": u.email,
+            "username": u.username,
+        }
+        for t, u in rows
+    ]
+
+    return terapeutas
+
+@social_router.get("/pacientes/search")
+async def buscar_pacientes_por_nome(
+    nome: str,
+    db: AsyncSession = Depends(get_async_session),
+    current_user: User = Depends(current_active_user),
+):
+    if current_user.is_patient:
+        raise HTTPException(status_code=403, detail="Apenas terapeutas podem buscar pacientes.")
+
+    subquery_conectados = (
+        select(PacienteTerapeuta.paciente_id)
+        .where(PacienteTerapeuta.terapeuta_id == current_user.id)
+    )
+
+    query = (
+        select(Paciente, User)
+        .join(User, User.id == Paciente.user_id)
+        .where(Paciente.nome_completo.ilike(f"%{nome}%"))
+        .where(not_(Paciente.user_id.in_(subquery_conectados)))
+        .limit(10)
+    )
+
+    result = await db.execute(query)
+    rows = result.all()
+
+    pacientes = [
+        {
+            "user_id": str(p.user_id),
+            "nome_completo": p.nome_completo,
+            "data_de_nascimento": str(p.data_de_nascimento),
+            "cpf": p.cpf,
+            "sexo": p.sexo.value,
+            "email": u.email,
+            "username": u.username,
+        }
+        for p, u in rows
+    ]
+
+    return pacientes
