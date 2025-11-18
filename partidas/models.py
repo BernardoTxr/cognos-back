@@ -21,6 +21,7 @@ class partida_JogoDoWisconsin(Base):
     erros_nonperseverativos = Column(Integer)
     falha_manter_conjunto = Column(Integer)
     categorias_completas = Column(Integer)
+    played_at = Column(TIMESTAMP, server_default="now()")  # timestamp como string para simplificação
 
 class partida_JogodaBola(Base):
     __tablename__ = "partida_jogodabola"

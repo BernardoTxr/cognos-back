@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
-from partidas.models import partida_JogodaMem, partida_JogodaBola, partida_JogoReac
+from partidas.models import partida_JogodaMem, partida_JogodaBola, partida_JogoReac, partida_JogoDoWisconsin
 from auth.users import current_active_user, User
 from database import get_async_session
 
@@ -67,6 +67,31 @@ async def get_jogo_reac(
     return [
         {
             "reacao": p.reacao,
+            "played_at": p.played_at,
+        }
+        for p in partidas
+    ]
+
+@router.get("/jogodowisconsin")
+async def get_jogo_wisconsin(
+    paciente_id: str,
+    db: AsyncSession = Depends(get_async_session),
+    user: User = Depends(current_active_user),
+):
+    result = await db.execute(
+        select(partida_JogoDoWisconsin)
+        .where(partida_JogoDoWisconsin.paciente_id == paciente_id)
+        .order_by(partida_JogoDoWisconsin.played_at)
+    )
+    partidas = result.scalars().all()
+
+    return [
+        {
+            "acertos": p.acertos,
+            "erros_perseverativos": p.erros_perseverativos,
+            "erros_nonperseverativos": p.erros_nonperseverativos,
+            "falha_manter_conjunto": p.falha_manter_conjunto,
+            "categorias_completas": p.categorias_completas,
             "played_at": p.played_at,
         }
         for p in partidas
