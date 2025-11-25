@@ -19,22 +19,21 @@ class TopicoWikiRead(TopicoWikiBase):
 
 # Schema base para um Conceito da Wiki
 class ConceitoWikiBase(BaseModel):
-    topico_id: int
+    topico: int
     conceito: str
     definicao: str
 
 # Schema para criação de um novo conceito (o que a API recebe no POST)
-class ConceitoWikiCreate(ConceitoWikiBase):
-    pass
+class ConceitoWikiCreate(BaseModel):
+    topico: str
+    conceito: str
+    definicao: str
+
 
 # Schema para leitura/retorno de um conceito (o que a API envia como resposta)
 class ConceitoWikiRead(ConceitoWikiBase):
     id: int
-    autor_id: uuid.UUID
     created_at: datetime
     updated_at: datetime
-    
-    # Você pode opcionalmente incluir o tópico relacionado para uma resposta mais rica
-    topico_rel: TopicoWikiRead
-
+    topico_rel: TopicoWikiRead  # Relacionamento opcional para incluir detalhes do tópico
     model_config = ConfigDict(from_attributes=True)

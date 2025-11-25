@@ -5,13 +5,11 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
-
-# Importações de outros módulos do seu projeto (ajuste os caminhos conforme necessário)
-# from app.database import get_async_session
-# from app.users.models import User
-# from app.users.auth import current_active_user
 from .models import ConceitosWiki
 from .schemas import ConceitoWikiCreate, ConceitoWikiRead
+from database import get_async_session
+from .models import TopicoWiki
+
 
 # --- Bloco de Suposições ---
 # O código abaixo simula dependências que existiriam em sua aplicação real.
@@ -19,10 +17,6 @@ from .schemas import ConceitoWikiCreate, ConceitoWikiRead
 
 from typing import AsyncGenerator
 import uuid
-
-# Simulação do get_async_session
-async def get_async_session() -> AsyncGenerator[AsyncSession, None]:
-    yield None  # type: ignore
 
 # Simulação do modelo de usuário
 class User:
@@ -55,38 +49,46 @@ async def create_wiki_concept(
     db: AsyncSession = Depends(get_async_session),
     current_user: User = Depends(current_active_user),
 ):
-    """
-    Cria um novo conceito na Wiki.
 
-    - **Apenas superusuários** podem criar novos conceitos.
-    - O ID do autor é obtido do usuário autenticado.
-    """
     if not current_user.is_superuser:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Permissão insuficiente. Apenas superusuários podem criar wikis.",
         )
 
+    # ===============================
+    # 1. VERIFICAR / CRIAR TÓPICO
+    # ===============================
+    nome_topico = conceito_in.topico  # nome enviado no front
+
+    query = select(TopicoWiki).where(TopicoWiki.topico == nome_topico)
+    result = await db.execute(query)
+    topico_existente = result.scalars().first()
+
+    if not topico_existente:
+        # criar novo tópico
+        novo_topico = TopicoWiki(topico=nome_topico)
+        db.add(novo_topico)
+        await db.commit()
+        await db.refresh(novo_topico)
+        topico_id = novo_topico.id
+    else:
+        topico_id = topico_existente.id
+
+    # ===============================
+    # 2. CRIAR CONCEITO
+    # ===============================
+
     db_conceito = ConceitosWiki(
-        **conceito_in.model_dump(),
-        autor_id=current_user.id
-    )
+        topico=topico_id,  # <- ESTE é o campo correto (ID do tópico)
+        conceito=conceito_in.conceito,
+        definicao=conceito_in.definicao )
 
     db.add(db_conceito)
     await db.commit()
     await db.refresh(db_conceito)
-    
-    # Para retornar o objeto completo com o relacionamento, precisamos carregá-lo
-    # após o commit.
-    query = (
-        select(ConceitosWiki)
-        .where(ConceitosWiki.id == db_conceito.id)
-        .options(selectinload(ConceitosWiki.topico_rel))
-    )
-    result = await db.execute(query)
-    created_conceito = result.scalar_one()
 
-    return created_conceito
+    return db_conceito
 
 @router.delete("/{conceito_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_wiki_concept(

@@ -11,6 +11,7 @@ from sqlalchemy.dialects.postgresql import UUID
 # Supondo que você tenha um arquivo 'database.py' com a Base declarativa
 # from app.database import Base
 from sqlalchemy.ext.declarative import declarative_base
+from dados.models import Terapeuta
 
 Base = declarative_base()
 
@@ -41,17 +42,10 @@ class ConceitosWiki(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     conceito: Mapped[str] = mapped_column(String, nullable=False)
     definicao: Mapped[str] = mapped_column(Text, nullable=False) # Usando Text para definições mais longas
-    
-    autor_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), 
-        ForeignKey("terapeuta.user_id"), 
-        nullable=False,
-        name="autor" # Mantendo o nome da coluna do DBML
-    )
 
     # A coluna 'topico' no DBML refere-se a 'topico_wiki.id', então o nome correto
     # da coluna de chave estrangeira seria 'topico_id'
-    topico_id: Mapped[int] = mapped_column(
+    topico: Mapped[int] = mapped_column(
         Integer, 
         ForeignKey("topico_wiki.id"),
         nullable=False,
@@ -72,5 +66,4 @@ class ConceitosWiki(Base):
     )
 
     # Relacionamentos
-    topico_rel = relationship("TopicoWiki", back_populates="conceitos")
-    # autor_rel = relationship("Terapeuta")
+    topico_rel = relationship("TopicoWiki", back_populates="conceitos", lazy="selectin")
