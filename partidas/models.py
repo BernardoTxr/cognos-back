@@ -12,6 +12,15 @@ class partida_JogodaMem(Base):
     duration = Column(Integer)  # em milisegundos
     played_at = Column(TIMESTAMP, server_default="now()")  # timestamp como string para simplificação
 
+class partida_JogoDoCognosMath(Base):
+    __tablename__ = "partida_jogocognosmath"
+    id = Column(Integer, primary_key=True, index=True)
+    paciente_id = Column(UUID, index=True)
+    acertos = Column(Integer)
+    tempo_medio_jogada = Column(Integer)  # em milisegundos
+    variancia_jogada = Column(Integer)  # em milisegundos ao quadrado
+    played_at = Column(TIMESTAMP, server_default="now()")  # timestamp como string para simplificação
+
 class partida_JogoDoWisconsin(Base):
     __tablename__ = "partida_jogodowisconsin"
     id = Column(Integer, primary_key=True, index=True)

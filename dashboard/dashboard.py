@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
-from partidas.models import partida_JogodaMem, partida_JogodaBola, partida_JogoReac, partida_JogoDoWisconsin
+from partidas.models import partida_JogodaMem, partida_JogoDoCognosMath, partida_JogodaBola, partida_JogoReac, partida_JogoDoWisconsin
 from auth.users import current_active_user, User
 from database import get_async_session
 
@@ -29,6 +29,27 @@ async def get_jogo_mem(
         for p in partidas
     ]
 
+@router.get("/jogodocognosmath")
+async def get_jogo_cognos_math(
+    paciente_id: str,
+    db: AsyncSession = Depends(get_async_session),
+    user: User = Depends(current_active_user),
+):
+    result = await db.execute(
+        select(partida_JogoDoCognosMath)
+        .where(partida_JogoDoCognosMath.paciente_id == paciente_id)
+        .order_by(partida_JogoDoCognosMath.played_at)
+    )
+    partidas = result.scalars().all()
+    return [
+        {
+            "acertos": p.acertos,
+            "tempo_medio_jogada": p.tempo_medio_jogada,
+            "variancia_jogada": p.variancia_jogada,
+            "played_at": p.played_at,
+        }
+        for p in partidas
+    ]
 
 @router.get("/jogodabola")
 async def get_jogo_bola(
