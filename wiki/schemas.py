@@ -2,6 +2,7 @@
 
 import uuid
 from datetime import datetime
+from uuid import UUID
 from pydantic import BaseModel, ConfigDict
 from typing import Optional
 
@@ -33,6 +34,8 @@ class ConceitoWikiCreate(BaseModel):
 # Schema para leitura/retorno de um conceito (o que a API envia como resposta)
 class ConceitoWikiRead(ConceitoWikiBase):
     id: int
+    autor_id: UUID
+    status: str
     created_at: datetime
     updated_at: datetime
     topico_rel: TopicoWikiRead  # Relacionamento opcional para incluir detalhes do tópico

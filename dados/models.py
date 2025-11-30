@@ -8,8 +8,11 @@ from sqlalchemy import (
     String,
     Date,
     Integer,
+    TIMESTAMP,
+    Text,
     Enum as SAEnum,
-    Boolean # Adicionado para o campo is_patient
+    Boolean,
+    func
 )
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import declarative_base, relationship
@@ -75,4 +78,45 @@ class PacienteTerapeuta(Base):
     terapeuta_id = Column(UUID(as_uuid=True), ForeignKey("terapeuta.user_id"), nullable=False)
     status = Column(SAEnum(status_conec), nullable=False, name='status')
 
+
+class StatusConceito(str, PyEnum):
+    PENDING = "pending"
+    APPROVED = "approved"
+    REJECTED = "rejected"
+
+class TopicoWiki(Base):
+    __tablename__ = "topico_wiki"
+
+    id = Column(Integer, primary_key=True)
+    topico = Column(String, nullable=False, unique=True)
+
+    conceitos = relationship(
+        "ConceitosWiki",
+        back_populates="topico_rel",
+        lazy="selectin"
+    )
+
+
+class ConceitosWiki(Base):
+    __tablename__ = "conceitos_wiki"
+
+    id = Column(Integer, primary_key=True)
+    conceito = Column(String, nullable=False)
+    definicao = Column(Text, nullable=False)
+    topico = Column(Integer, ForeignKey("topico_wiki.id"), nullable=False,name="topico")
+    status = Column(SAEnum(StatusConceito, name="status_enum_conceitos", native_enum=True, values_callable=lambda obj: [e.value for e in obj],), nullable=False, default=StatusConceito.PENDING, server_default=StatusConceito.PENDING.value)
+    autor_id = Column(UUID(as_uuid=True),ForeignKey("terapeuta.user_id"),nullable=False)
+    created_at = Column(TIMESTAMP(timezone=True),server_default=func.now(),nullable=False)
+    updated_at = Column(TIMESTAMP(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
+
+    topico_rel = relationship(
+        "TopicoWiki",
+        back_populates="conceitos",
+        lazy="selectin"
+    )
+
+    autor = relationship(
+        "Terapeuta",
+        lazy="selectin"
+    )
     
